@@ -128,9 +128,8 @@ def reset_password_width_token(token,new_password):
         return jsonify({"error":"Token inválido o ya usado"}),400
     
     #token expiry check
-    if reset_token.expires_at < now_utc():
-        return jsonify({"error":"Token expirado"}),400
-    
+    if reset_token.expires_at.replace(tzinfo=None) < now_utc().replace(tzinfo=None):
+    return jsonify({"error":"Token expirado"}),400
     #update user password
     user = User.query.get(reset_token.user_id)
     user.password_hash = hash_password(new_password)
