@@ -59,8 +59,8 @@ def reset_password():
         return {"error": "Los campos 'token' y 'new_password' son obligatorios."}, 400
 
 @auth_bp.route('/change-password', methods=['POST'])
-@login_required  # ¡Importante! Requiere autenticación
-def auth_required():
+@auth_required  # ¡Importante! Requiere autenticación
+def change_password():
     data = request.get_json()
     if not data or 'old_password' not in data or 'new_password' not in data:
         return {"error": "Los campos 'old_password' y 'new_password' son obligatorios."}, 400
