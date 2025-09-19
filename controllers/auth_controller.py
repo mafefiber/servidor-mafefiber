@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 import os
 from sqlalchemy import or_
+from models import db, User, PasswordResetToken, UserToken
 from models import db, User, PasswordResetToken
 from security import hash_password,check_password,generate_token,expiry,now_utc
 import smtplib
