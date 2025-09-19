@@ -2,7 +2,6 @@ from datetime import datetime, timedelta
 import os
 from sqlalchemy import or_
 from models import db, User, PasswordResetToken, UserToken
-from models import db, User, PasswordResetToken
 from security import hash_password,check_password,generate_token,expiry,now_utc
 import smtplib
 from email.mime.text import MIMEText
@@ -41,7 +40,7 @@ def login_user(username_or_email,password,hours=24):
     db.session.commit()
     return jsonify({
         "token":tok.token,
-        "expires_at":tok.expiries_at.isoformat(),
+        "expires_at":tok.expires_at.isoformat(),
         "user":_public_user(user),
 
     }),200
