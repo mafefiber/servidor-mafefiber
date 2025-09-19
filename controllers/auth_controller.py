@@ -34,7 +34,7 @@ def login_user(username_or_email,password,hours=24):
     tok=UserToken(
         user_id=user.id,
         token=generate_token(),
-        expiries_at=expiry(hours),
+        expires_at=expiry(hours),
         is_active=True,
     )
     db.session.add(tok)
