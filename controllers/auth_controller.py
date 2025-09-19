@@ -95,7 +95,7 @@ def request_password_reset(email):
     
     #generar token unique
     token = generate_token()
-    expiry=datetime.urcnow() + timedelta(hours=24)
+    expiry=datetime.utcnow() + timedelta(hours=24)
 
 
     #create reset token
