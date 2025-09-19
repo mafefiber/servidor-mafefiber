@@ -1,7 +1,7 @@
 from flask import Blueprint, request
 from controllers.auth_controller import(
-    register_user,login_user,logout_token,me_user,refresh_token,
-    request_password_reset, reset_password_with_token, change_password
+     register_user,login_user,logout_token,me_user,refresh_token,
+    request_password_reset, reset_password_width_token, change_password
 )
 from auth import auth_required,_extract_bearer
 from flask import g
@@ -57,7 +57,7 @@ def reset_password():
     data = request.get_json()
     if not data or 'token' not in data or 'new_password' not in data:
         return {"error": "Los campos 'token' y 'new_password' son obligatorios."}, 400
-
+    return reset_password_width_token(data['token'], data['new_password'])
 @auth_bp.route('/change-password', methods=['POST'])
 @auth_required  # ¡Importante! Requiere autenticación
 def change_password():
