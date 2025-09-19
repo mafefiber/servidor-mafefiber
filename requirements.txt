@@ -10,3 +10,4 @@ flasgger==0.9.7.1
 alembic==1.12.1
 SQLAlchemy==2.0.25
 Werkzeug==2.3.7
+requests
