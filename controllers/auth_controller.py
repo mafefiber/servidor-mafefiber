@@ -6,6 +6,7 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from flask import jsonify
+import requests
 
 def register_user(username,email,password,full_name=None):
     if User.query.filter(or_(User.username==username,User.email==email)).first():
@@ -141,19 +142,9 @@ def reset_password_width_token(token,new_password):
     return jsonify({"ok":True,"msg":"Contraseña restablecida"}),200
 
 def send_reset_email(email, token):
-    """Enviar correo de restablecimiento de contraseña"""
-    smtp_server = os.getenv('SMTP_SERVER','smtp.gmail.com')
-    smtp_port =int(os.getenv('SMTP_PORT',587))
-    smtp_user = os.getenv('SMTP_USER')
-    smtp_password = os.getenv('SMTP_PASSWORD')
-
-    msg = MIMEMultipart()
-    msg['From'] = smtp_user
-    msg['To'] = email
-    msg['Subject'] = "Restablecimiento de contraseña - Mafefiber"
-
-    #reset url for frontend
-    reset_url = f"{os.getenv('FRONTEND_URL','mafefiber-production.up.railway.app')}/reset-password?token={token}"
+    """Enviar correo de restablecimiento de contraseña usando Brevo API"""
+    brevo_api_key = os.getenv('BREVO_API_KEY')
+    reset_url = f"{os.getenv('FRONTEND_URL','https://mafefiber-production.up.railway.app')}/reset-password?token={token}"
 
     body = f"""
     <p>Has solicitado restablecer tu contraseña. Haz clic en el siguiente enlace para continuar:</p>
@@ -161,12 +152,23 @@ def send_reset_email(email, token):
     <p>Si no solicitaste este cambio, puedes ignorar este correo.</p>
     <p>El enlace expirará en 24 horas.</p>
     """
-    msg.attach(MIMEText(body,'html'))
 
-    with smtplib.SMTP(smtp_server,smtp_port) as server:
-        server.starttls()
-        server.login(smtp_user,smtp_password)
-        server.send_message(msg)
+    data = {
+        "sender": {"name": "Mafefiber", "email": "no-reply@mafefiber.com"},
+        "to": [{"email": email}],
+        "subject": "Restablecimiento de contraseña - Mafefiber",
+        "htmlContent": body
+    }
+
+    headers = {
+        "accept": "application/json",
+        "api-key": brevo_api_key,
+        "content-type": "application/json"
+    }
+
+    response = requests.post("https://api.brevo.com/v3/smtp/email", json=data, headers=headers)
+    print("Brevo response:", response.status_code, response.text)
+    response.raise_for_status()  # Lanza excepción si hay error
 
 #change password
 def change_password(user,old_password,new_password):
