@@ -154,7 +154,15 @@ def send_reset_email(email, token):
     """
 
     data = {
-        "sender": {"name": "Mafefiber", "email": "no-reply@mafefiber.com"},
+        "sender": {"name": "Mafefiber", "email": "def send_reset_email(email, token):
+    # ...
+    data = {
+        "sender": {"name": "Mafefiber", "email": "cjair759@gmail.com"},  # <-- Cambia aquí
+        "to": [{"email": email}],
+        "subject": "Restablecimiento de contraseña - Mafefiber",
+        "htmlContent": body
+    }
+    # ..."},
         "to": [{"email": email}],
         "subject": "Restablecimiento de contraseña - Mafefiber",
         "htmlContent": body
