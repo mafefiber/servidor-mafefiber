@@ -492,3 +492,17 @@ class InventoryMovement(db.Model):
     product = db.relationship('Product', backref=db.backref('inventory_movements', lazy=True))
     purchase = db.relationship('ProductPurchase', backref=db.backref('inventory_movements', lazy=True))
     order_item = db.relationship('OrderItem', backref=db.backref('inventory_movements', lazy=True))
+
+#table PasswordResets
+class PasswordResetToken(db.Model):
+    __tablename__ = 'password_reset_tokens'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    token = db.Column(db.String(256), unique=True, nullable=False)
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
+    expires_at = db.Column(db.DateTime, nullable=False)
+    is_used = db.Column(db.Boolean, default=False)
+
+    user = db.relationship('User', backref=db.backref('password_reset_tokens', lazy=True))
+
+    
