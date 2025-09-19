@@ -1,7 +1,7 @@
 from flask import Blueprint, request
 from controllers.auth_controller import(
-    register_user,login_user,logout_token,me_user,refresh_token
-
+    register_user,login_user,logout_token,me_user,refresh_token,
+    request_password_reset, reset_password_with_token, change_password
 )
 from auth import auth_required,_extract_bearer
 from flask import g
@@ -50,7 +50,7 @@ def forgot_password():
     if not data or 'email' not in data:
         return {"error": "El campo 'email' es obligatorio."}, 400
 
-    return forgot_password_controller(data['email'])
+    return request_password_reset(data['email'])
 
 @auth_bp.route('/reset-password', methods=['POST'])
 def reset_password():
