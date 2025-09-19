@@ -97,7 +97,6 @@ def request_password_reset(email):
     token = generate_token()
     expiry=datetime.utcnow() + timedelta(hours=24)
 
-
     #create reset token
     reset_token = PasswordResetToken(
         user_id=user.id,
@@ -107,12 +106,12 @@ def request_password_reset(email):
     db.session.add(reset_token)
     db.session.commit()
 
-
     # send email
     try:
         send_reset_email(user.email,token)
         return jsonify({"ok":True,"msg":"Correo de restablecimiento enviado"}),200
     except Exception as e:
+        print("Error al enviar el correo de recuperación:", repr(e))  # <-- LOG DEL ERROR
         db.session.delete(reset_token)
         db.session.commit()
         return jsonify({"error":"Error al enviar el correo"}),500
