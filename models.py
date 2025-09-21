@@ -183,6 +183,8 @@ class Product(db.Model):
     stock_quantity = db.Column(db.Integer, default=0) # Quantity in stock
     is_active = db.Column(db.Boolean, default=True)
     create_at=db.Column(db.DateTime, server_default=db.func.now())
+    images = db.Column(db.Text, nullable=True)  # image urls separated by line breaks
+
 
 #table commets
 class Comment(db.Model):
@@ -505,4 +507,12 @@ class PasswordResetToken(db.Model):
 
     user = db.relationship('User', backref=db.backref('password_reset_tokens', lazy=True))
 
-    
+#gallery images
+class GalleryImage(db.Model):
+    __tablename__ = 'gallery_images'
+    id = db.Column(db.Integer, primary_key=True)
+    urls = db.Column(db.Text, nullable=False)
+    alt_text = db.Column(db.String(120), nullable=True)
+    description = db.Column(db.Text, nullable=True)
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
