@@ -30,10 +30,12 @@ class UserToken(db.Model):
 #table customer
 class Customer(db.Model):
     __tablename__ = 'customers'
-    id = db.Column(db.Integer, primary_key=True)
-    customer_type_id = db.Column(db.Integer, db.ForeignKey('customer_types.id'), nullable=False)
+    id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)  # PK y FK
+    customer_type_id = db.Column(db.Integer, db.ForeignKey('customer_types.id'), nullable=False, default=3)
     is_active = db.Column(db.Boolean, default=True)
     create_at = db.Column(db.DateTime, server_default=db.func.now())
+    
+    user = db.relationship('User', backref=db.backref('customer', uselist=False))
 
 #table customer types
 class CustomerType(db.Model):

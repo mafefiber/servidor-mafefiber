@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 import os
 from sqlalchemy import or_
-from models import db, User, PasswordResetToken, UserToken
+from models import db, User, PasswordResetToken, UserToken,Customer
 from security import hash_password,check_password,generate_token,expiry,now_utc
 import smtplib
 from email.mime.text import MIMEText
@@ -9,9 +9,9 @@ from email.mime.multipart import MIMEMultipart
 from flask import jsonify
 import requests
 
-def register_user(username,email,password,full_name=None):
-    if User.query.filter(or_(User.username==username,User.email==email)).first():
-        return jsonify({"error":"El nombre de usuario o correo ya existe"}),400
+def register_user(username, email, password, full_name=None):
+    if User.query.filter(or_(User.username == username, User.email == email)).first():
+        return jsonify({"error": "El nombre de usuario o correo ya existe"}), 400
     user = User(
         username=username.strip(),
         email=email.strip().lower(),
@@ -21,8 +21,26 @@ def register_user(username,email,password,full_name=None):
         is_active=True,
     )
     db.session.add(user)
+    db.session.flush()  # user.id disponible antes del commit
+
+    # Crear el customer con el mismo id y customer_type_id=3
+    customer = Customer(
+        id=user.id,  # PK igual al id del user
+        customer_type_id=3,
+        is_active=True
+    )
+    db.session.add(customer)
     db.session.commit()
-    return jsonify({"ok":True,"user":_public_user(user)}),201
+    return jsonify({
+        "ok": True,
+        "user": _public_user(user),
+        "customer": {
+            "id": customer.id,
+            "customer_type_id": customer.customer_type_id,
+            "is_active": customer.is_active,
+            "create_at": customer.create_at.isoformat() if customer.create_at else None
+        }
+    }), 201
 
 def login_user(username_or_email,password,hours=24):
     user =User.query.filter(
@@ -30,6 +48,8 @@ def login_user(username_or_email,password,hours=24):
     ).first()
     if not user or not check_password(password,user.password_hash):
         return jsonify({"error":"Credenciales inválidas"}),401
+    if not user.is_active:
+        return jsonify({"error":"Usuario desactivado"}),403
     tok=UserToken(
         user_id=user.id,
         token=generate_token(),
@@ -180,4 +200,68 @@ def change_password(user,old_password,new_password):
     user.password_hash = hash_password(new_password)
     db.session.commit()
     return jsonify({"ok":True,"msg":"Contraseña cambiada"}),200
+
+
+#get all users (admin only)
+
+def get_all_users():
+    users = User.query.all()
+    return jsonify({
+        "users": [
+            _public_user(u) for u in users
+        ]
+    }), 200
+
+#get users by id
+def get_user_by_id(user_id):
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({"error": "Usuario no encontrado"}), 404
+    return jsonify({"user": _public_user(user)}), 200
+
+#update user by id
+
+def update_user_by_id(user_id, data):
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({"error": "Usuario no encontrado"}), 404
+    # Solo actualiza campos permitidos
+    for field in ["username", "email", "full_name", "is_active"]:
+        if field in data:
+            setattr(user, field, data[field])
+    db.session.commit()
+    return jsonify({"ok": True, "user": _public_user(user)}), 200
+
+#deactivate user by id
+def deactivate_user_by_id(user_id):
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({"error": "Usuario no encontrado"}), 404
+    user.is_active = False
+    db.session.commit()
+    return jsonify({"ok": True, "msg": "Usuario desactivado"}), 200
+
+
+def activate_user_by_id(user_id):
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({"error": "Usuario no encontrado"}), 404
+    user.is_active = True
+    db.session.commit()
+    return jsonify({"ok": True, "msg": "Usuario activado"}), 200
+
+#search user
+
+def search_users(query):
+    #search userneame,email and full name
+    user = User.query.filter(
+        or_(
+            User.username.ilike(f"%{query}%"),
+            User.email.ilike(f"%{query}%"),
+            User.full_name.ilike(f"%{query}%")
+        )
+    ).all()
+    return jsonify({
+        "users": [_public_user(u) for u in user]
+    }), 200
 

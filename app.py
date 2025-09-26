@@ -19,7 +19,13 @@ def create_app():
 
     db.init_app(app)
     Migrate(app,db)
-    CORS(app, resources={r"*": {"origins": "*"}})
+    # Allow Authorization header and PATCH methods so browser preflight succeeds
+    CORS(app,
+      resources={r"*": {"origins": "http://localhost:4321"}},
+      supports_credentials=True,
+      allow_headers=["Content-Type", "Authorization"],
+      methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
+    )
 
     register_blueprints(app)
     Swagger(app, config=swagger_config, template=template)

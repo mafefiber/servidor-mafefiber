@@ -65,3 +65,54 @@ def change_password():
     if not data or 'old_password' not in data or 'new_password' not in data:
         return {"error": "Los campos 'old_password' y 'new_password' son obligatorios."}, 400
     return change_password(g.current_user, data['old_password'], data['new_password'])
+
+@auth_bp.get('/auth/users')
+@auth_required
+def get_users():
+    if not getattr(g.current_user, "id_admin", False):
+        return {"error": "Solo administradores"}, 403
+    from controllers.auth_controller import get_all_users
+    return get_all_users()
+
+@auth_bp.get('/auth/users/<int:user_id>')
+@auth_required
+def get_user(user_id):
+    if not getattr(g.current_user, "id_admin", False):
+        return {"error": "Solo administradores"}, 403
+    from controllers.auth_controller import get_user_by_id
+    return get_user_by_id(user_id)
+
+@auth_bp.put('/auth/users/<int:user_id>')
+@auth_required
+def update_user(user_id):
+    if not getattr(g.current_user, "id_admin", False):
+        return {"error": "Solo administradores"}, 403
+    data = request.get_json() or {}
+    from controllers.auth_controller import update_user_by_id
+    return update_user_by_id(user_id, data)
+
+@auth_bp.patch('/auth/users/<int:user_id>/deactivate')
+@auth_required
+def deactivate_user(user_id):
+    if not getattr(g.current_user, "id_admin", False):
+        return {"error": "Solo administradores"}, 403
+    from controllers.auth_controller import deactivate_user_by_id
+    return deactivate_user_by_id(user_id)
+
+
+@auth_bp.patch('/auth/users/<int:user_id>/activate')
+@auth_required
+def activate_user(user_id):
+    if not getattr(g.current_user, "id_admin", False):
+        return {"error": "Solo administradores"}, 403
+    from controllers.auth_controller import activate_user_by_id
+    return activate_user_by_id(user_id)
+
+@auth_bp.get('/auth/users/search')
+@auth_required
+def search_users_route():
+    if not getattr(g.current_user,"id_admin",False):
+        return {"error":"Solo administradores"},403
+    query = request.args.get('q','')
+    from controllers.auth_controller import search_users
+    return search_users(query)

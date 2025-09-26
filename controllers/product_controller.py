@@ -1,4 +1,5 @@
 from flask import request, jsonify
+from sqlalchemy import or_
 from models import db, Product
 
 def product_to_dict(product):
@@ -45,7 +46,18 @@ def get_products():
     """
     Obtener lista de todos los productos activos
     """
-    products = Product.query.filter_by(is_active=True).all()
+    # Support optional search query: ?search=texto
+    query = request.args.get('search', '').strip()
+    if query:
+        products = Product.query.filter(Product.is_active == True).filter(
+            or_(
+                Product.name.ilike(f"%{query}%"),
+                Product.description.ilike(f"%{query}%")
+            )
+        ).all()
+    else:
+        products = Product.query.filter_by(is_active=True).all()
+
     return jsonify([product_to_dict(p) for p in products]), 200
 
 def get_product(product_id):
