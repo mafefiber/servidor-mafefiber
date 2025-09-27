@@ -104,6 +104,7 @@ class Plan(db.Model):
     price = db.Column(db.Numeric(10,2), nullable=False)
     technology = db.Column(db.String(50), nullable=False)  # Example: 'fibra', 'radioenlace', 'cable'
     description = db.Column(db.Text)
+    features = db.Column(db.Text,nullable=True)  # <-- aquí puedes guardar una lista o dict de características
     is_active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, server_default=db.func.now())
 
@@ -117,8 +118,7 @@ class PlanFeature(db.Model):
     is_active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, server_default=db.func.now())
 
-    plan = db.relationship('Plan', backref=db.backref('features', lazy=True))
-
+    plan = db.relationship('Plan', backref=db.backref('plan_features', lazy=True))
 #table subscriptions
 class Subscription(db.Model):
     __tablename__='subscriptions'

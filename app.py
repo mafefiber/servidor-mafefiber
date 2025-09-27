@@ -20,8 +20,16 @@ def create_app():
     db.init_app(app)
     Migrate(app,db)
     # Allow Authorization header and PATCH methods so browser preflight succeeds
+    # Permit production origin and common local dev origins used by the frontend
     CORS(app,
-      resources={r"*": {"origins": "https://mafefiber-production.up.railway.app"}},
+      resources={r"*": {"origins": [
+        "https://mafefiber-production.up.railway.app",
+        "https://servidor-mafefiber-production.up.railway.app",
+        "http://localhost:4321",
+        "http://127.0.0.1:4321",
+        "http://localhost:3000",
+        "http://127.0.0.1:5000"
+      ]}},
       supports_credentials=True,
       allow_headers=["Content-Type", "Authorization"],
       methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]

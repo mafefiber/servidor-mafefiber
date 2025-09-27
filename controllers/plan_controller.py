@@ -9,6 +9,7 @@ def plan_to_dict(plan):
         'price':float(plan.price),
         'technology':plan.technology,
         'description':plan.description,
+        'features': plan.features,  # <-- Agregado aquí
         'is_active':plan.is_active,
         'created_at':plan.created_at.isoformat() if plan.created_at else None
     }
@@ -60,17 +61,19 @@ def create_plan():
     price = data.get('price')
     technology = data.get('technology')
     description = data.get('description')
+    features = data.get('features')  # <-- Agregado aquí
 
     if not name or not speed_mbps or not price or not technology:
         return jsonify({'error':'Faltan datos requeridos'}),400
 
     plan=Plan(
-        name=name,
-        speed_mbps=speed_mbps,
-        price=price,
-        technology=technology,
-        description=description
-    )
+    name=name,
+    speed_mbps=speed_mbps,
+    price=price,
+    technology=technology,
+    description=description,
+    features=features  # <-- Agregado aquí
+  )
     db.session.add(plan)
     db.session.commit()   
     return jsonify(plan_to_dict(plan)),201
@@ -161,6 +164,7 @@ def update_plan(plan_id):
     plan.price=data.get('price',plan.price)
     plan.technology=data.get('technology',plan.technology)
     plan.description=data.get('description',plan.description)
+    plan.features = data.get('features', plan.features)  # <-- Agregado aquí
     db.session.commit()
     return jsonify(plan_to_dict(plan)),200
 

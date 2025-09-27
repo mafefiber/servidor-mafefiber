@@ -49,14 +49,14 @@ def get_products():
     # Support optional search query: ?search=texto
     query = request.args.get('search', '').strip()
     if query:
-        products = Product.query.filter(Product.is_active == True).filter(
+        products = Product.query.filter(
             or_(
                 Product.name.ilike(f"%{query}%"),
                 Product.description.ilike(f"%{query}%")
             )
         ).all()
     else:
-        products = Product.query.filter_by(is_active=True).all()
+        products = Product.query.all()
 
     return jsonify([product_to_dict(p) for p in products]), 200
 
@@ -86,7 +86,7 @@ def update_product(product_id):
     db.session.commit()
     return jsonify(product_to_dict(product)), 200
 
-def delete_product(product_id):
+def deactivate_product(product_id):
     """
     Desactivar un producto (soft delete)
     """
@@ -94,3 +94,12 @@ def delete_product(product_id):
     product.is_active = False
     db.session.commit()
     return jsonify({'message': 'Producto desactivado'}), 200
+
+def activate_product(product_id):
+    """
+    Activar un producto (is_active=True)
+    """
+    product = Product.query.get_or_404(product_id)
+    product.is_active = True
+    db.session.commit()
+    return jsonify({'message': 'Producto activado'}), 200
